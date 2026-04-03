@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bingo Admin – Hadeees' Millions Bingo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD700;
+    --green: #00cc44;
+    --red: #ff4444;
+    --dark: #0a0a0a;
+    --panel: #111;
+    --panel2: #161616;
+    --border: #222;
+    --border2: #2a2a2a;
+    --text: #e8e8e8;
+    --muted: #666;
+    --team1: #4fc3f7;
+    --team2: #ff8a65;
+    --team3: #81c784;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #111;
+    border-bottom: 2px solid var(--gold);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+    color: var(--gold);
+  }
+
+  .admin-badge {
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .save-status {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+
+  .save-status.saving { color: var(--gold); }
+  .save-status.saved { color: var(--green); }
+
+  .main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  /* SIDEBAR */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+  }
+
+  .panel-body { padding: 16px; }
+
+  .team-editor { display: flex; flex-direction: column; gap: 16px; }
+
+  .team-item {
+    background: var(--panel2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid;
+  }
+
+  .team-item[data-team="0"] { border-left-color: var(--team1); }
+  .team-item[data-team="1"] { border-left-color: var(--team2); }
+  .team-item[data-team="2"] { border-left-color: var(--team3); }
+
+  .team-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  input[type="text"], input[type="number"], input[type="url"] {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 6px;
+  }
+
+  input:focus { border-color: var(--gold); }
+  input::placeholder { color: var(--muted); }
+
+  .field-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .bonus-row-setting {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bonus-row-setting input {
+    width: 80px;
+    margin-bottom: 0;
+  }
+
+  .bonus-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* BOARD ADMIN */
+  .board-admin { flex: 1; }
+
+  .board-grid-admin {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+
+  .tile-admin {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: border-color 0.2s;
+  }
+
+  .tile-admin:hover { border-color: #333; }
+
+  .tile-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .tile-name-display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    min-height: 32px;
+  }
+
+  .tile-points-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    color: var(--gold);
+  }
+
+  .tile-img-preview {
+    width: 100%;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 4px;
+    background: #0d0d0d;
+  }
+
+  .tile-img-placeholder {
+    width: 100%;
+    height: 48px;
+    background: #0d0d0d;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: var(--muted);
+    cursor: pointer;
+    border: 1px dashed var(--border2);
+    transition: border-color 0.2s;
+  }
+
+  .tile-img-placeholder:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Team completion toggles */
+  .tile-teams {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .team-toggle {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 4px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .team-toggle[data-team="0"].active { background: var(--team1); border-color: var(--team1); color: #000; }
+  .team-toggle[data-team="1"].active { background: var(--team2); border-color: var(--team2); color: #000; }
+  .team-toggle[data-team="2"].active { background: var(--team3); border-color: var(--team3); color: #000; }
+
+  .team-toggle[data-team="0"]:not(.active):hover { border-color: var(--team1); color: var(--team1); }
+  .team-toggle[data-team="1"]:not(.active):hover { border-color: var(--team2); color: var(--team2); }
+  .team-toggle[data-team="2"]:not(.active):hover { border-color: var(--team3); color: var(--team3); }
+
+  /* Edit tile modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #141414;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    width: 380px;
+    max-width: 95vw;
+  }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    transition: opacity 0.2s;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: var(--gold); color: #000; }
+  .btn-secondary { background: var(--border); color: var(--text); }
+
+  .edit-icon {
+    font-size: 0.7rem;
+    color: var(--muted);
+    cursor: pointer;
+    text-align: center;
+    padding: 2px;
+    transition: color 0.2s;
+  }
+
+  .edit-icon:hover { color: var(--gold); }
+
+  .reset-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--red);
+    background: transparent;
+    color: var(--red);
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .reset-btn:hover { background: var(--red); color: #fff; }
+
+  @media (max-width: 1024px) {
+    .main { grid-template-columns: 1fr; }
+    .board-grid-admin { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-title">Bingo Admin</div>
+    <div class="admin-badge">Control Panel</div>
+  </div>
+  <div class="save-status" id="save-status">All changes saved</div>
+</header>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="panel">
+      <div class="panel-header">Teams</div>
+      <div class="panel-body">
+        <div class="team-editor" id="team-editor"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">Settings</div>
+      <div class="panel-body">
+        <label class="field-label">Row / Column Bonus Points</label>
+        <div class="bonus-row-setting">
+          <input type="number" id="bonus-input" value="75" min="0">
+          <div class="bonus-desc">Awarded when a full row or column is completed</div>
+        </div>
+        <button class="reset-btn" id="reset-btn" style="margin-top:16px">Reset All Completions</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOARD -->
+  <div class="board-admin panel">
+    <div class="panel-header">Board – Click tiles to mark complete per team · Click ✏️ to edit tile</div>
+    <div class="panel-body">
+      <div class="board-grid-admin" id="board-grid-admin"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">Edit Tile</div>
+    <label class="field-label">Tile Name</label>
+    <input type="text" id="modal-name" placeholder="Tile name">
+    <label class="field-label">Points</label>
+    <input type="number" id="modal-points" placeholder="100" min="0">
+    <label class="field-label">Image URL (Imgur)</label>
+    <input type="url" id="modal-image" placeholder="https://i.imgur.com/...">
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save">Save Tile</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjjKHVn0m3o4-FQuntIOmZG5XOCRCi2oo",
+  authDomain: "millions-bingo.firebaseapp.com",
+  databaseURL: "https://millions-bingo-default-rtdb.firebaseio.com",
+  projectId: "millions-bingo",
+  storageBucket: "millions-bingo.firebasestorage.app",
+  messagingSenderId: "1089430413297",
+  appId: "1:1089430413297:web:503f66b97df26248612e50"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const bingoRef = ref(db, 'bingo');
+
+let gameState = null;
+let editingTileIdx = null;
+let saveTimer = null;
+
+const TEAM_COLORS = ['var(--team1)', 'var(--team2)', 'var(--team3)'];
+
+const DEFAULT_TILES = [
+  { name: "Boss Pet", points: 250 },
+  { name: "3 Gems from TOA", points: 150 },
+  { name: "Barrows set (Same brother)", points: 200 },
+  { name: "Twinflame from Scratch", points: 100 },
+  { name: "Fedora", points: 50 },
+  { name: "PM Armour Set (Mix & Match)", points: 150 },
+  { name: "GWD Armour Set (Mix & Match)", points: 150 },
+  { name: "Delve Unique", points: 200 },
+  { name: "Aquanite Tendon", points: 100 },
+  { name: "30m total EXP", points: 200 },
+  { name: "Slayer Helm Recolor", points: 50 },
+  { name: "Crystalline Prison", points: 200 },
+  { name: "Boat bottle", points: 50 },
+  { name: "Godsword from Scratch", points: 200 },
+  { name: "Any virtus piece", points: 150 },
+  { name: "Boss Jar Drop", points: 50 },
+  { name: "Raids Weapon (1 Mega rare or 3 basic)", points: 250 },
+  { name: "DT2 ring from scratch", points: 200 },
+  { name: "5m Firemaking XP", points: 200 },
+  { name: "Lord of the Dags", points: 100 },
+  { name: "Mask of Ranul", points: 50 },
+  { name: "Raids armor set, any combo", points: 150 },
+  { name: "Zulrah Puzzle Box", points: 50 },
+  { name: "Any Araxxor unique", points: 100 },
+  { name: "300 Yama's slaught", points: 150 },
+  { name: "Pharaoh's sceptre", points: 100 },
+  { name: "Any champion scroll", points: 100 },
+  { name: "4 Zenytes", points: 150 },
+  { name: "Dragon Hunter Wand or Tome of Earth", points: 100 },
+  { name: "Any inquisitor piece or orb from Nightmare", points: 200 },
+  { name: "8 Awakener Orbs", points: 150 },
+  { name: "Any oathplate piece", points: 150 },
+  { name: "Gun Game - 5 CA's", points: 150 },
+  { name: "Blood Shard", points: 50 },
+  { name: "Any ward from scratch", points: 150 },
+  { name: "Skilling Pet", points: 250 },
+].map(t => ({ ...t, image: "", completed: [false, false, false] }));
+
+const DEFAULT_STATE = {
+  tiles: DEFAULT_TILES,
+  teams: [
+    { name: "Team Turbo Tism", logo: "" },
+    { name: "Team A", logo: "" },
+    { name: "Team B", logo: "" }
+  ],
+  bonusPoints: 75
+};
+
+function setSaveStatus(status) {
+  const el = document.getElementById('save-status');
+  el.className = 'save-status ' + status;
+  el.textContent = status === 'saving' ? 'Saving...' : status === 'saved' ? '✓ Saved' : 'All changes saved';
+}
+
+async function saveState() {
+  if (!gameState) return;
+  setSaveStatus('saving');
+  await set(bingoRef, gameState);
+  setSaveStatus('saved');
+  setTimeout(() => setSaveStatus(''), 2000);
+}
+
+function debounceSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveState, 600);
+}
+
+function renderTeams() {
+  const container = document.getElementById('team-editor');
+  container.innerHTML = '';
+  gameState.teams.forEach((team, ti) => {
+    const div = document.createElement('div');
+    div.className = 'team-item';
+    div.dataset.team = ti;
+    div.innerHTML = `
+      <div class="team-label">Team ${ti + 1}</div>
+      <input type="text" placeholder="Team name" value="${team.name || ''}" data-field="name" data-team="${ti}">
+      <input type="text" placeholder="Short nickname (for tile badges)" value="${team.nickname || ''}" data-field="nickname" data-team="${ti}">
+      <input type="url" placeholder="Logo URL (Imgur)" value="${team.logo || ''}" data-field="logo" data-team="${ti}">
+    `;
+    container.appendChild(div);
+  });
+
+  container.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', e => {
+      const ti = parseInt(e.target.dataset.team);
+      const field = e.target.dataset.field;
+      gameState.teams[ti][field] = e.target.value;
+      debounceSave();
+      renderBoard();
+    });
+  });
+}
+
+function renderBoard() {
+  const grid = document.getElementById('board-grid-admin');
+  grid.innerHTML = '';
+
+  gameState.tiles.forEach((tile, idx) => {
+    const div = document.createElement('div');
+    div.className = 'tile-admin';
+
+    const imgHTML = tile.image
+      ? `<img src="${tile.image}" class="tile-img-preview" alt="">`
+      : `<div class="tile-img-placeholder" data-idx="${idx}">+ IMG</div>`;
+
+    const toggles = gameState.teams.map((team, ti) => {
+      const active = tile.completed && tile.completed[ti] ? 'active' : '';
+      const shortName = (team.nickname || team.name || `T${ti+1}`).substring(0, 6);
+      return `<button class="team-toggle ${active}" data-team="${ti}" data-idx="${idx}">${shortName}</button>`;
+    }).join('');
+
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="tile-number">#${idx + 1}</div>
+        <div class="edit-icon" data-idx="${idx}">✏️</div>
+      </div>
+      ${imgHTML}
+      <div class="tile-name-display">${tile.name}</div>
+      <div class="tile-points-display">${tile.points} pts</div>
+      <div class="tile-teams">${toggles}</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  // Toggle completion
+  grid.querySelectorAll('.team-toggle').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const ti = parseInt(e.target.dataset.team);
+      const idx = parseInt(e.target.dataset.idx);
+      if (!gameState.tiles[idx].completed) gameState.tiles[idx].completed = [false, false, false];
+      gameState.tiles[idx].completed[ti] = !gameState.tiles[idx].completed[ti];
+      debounceSave();
+      renderBoard();
+    });
+  });
+
+  // Edit icons
+  grid.querySelectorAll('.edit-icon').forEach(icon => {
+    icon.addEventListener('click', e => openModal(parseInt(e.target.dataset.idx)));
+  });
+
+  // Image placeholder click
+  grid.querySelectorAll('.tile-img-placeholder').forEach(ph => {
+    ph.addEventListener('click', e => openModal(parseInt(e.target.dataset.idx)));
+  });
+}
+
+function openModal(idx) {
+  editingTileIdx = idx;
+  const tile = gameState.tiles[idx];
+  document.getElementById('modal-name').value = tile.name || '';
+  document.getElementById('modal-points').value = tile.points || 0;
+  document.getElementById('modal-image').value = tile.image || '';
+  document.getElementById('modal').classList.add('open');
+}
+
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal').classList.remove('open');
+});
+
+document.getElementById('modal-save').addEventListener('click', () => {
+  if (editingTileIdx === null) return;
+  gameState.tiles[editingTileIdx].name = document.getElementById('modal-name').value;
+  gameState.tiles[editingTileIdx].points = parseInt(document.getElementById('modal-points').value) || 0;
+  gameState.tiles[editingTileIdx].image = document.getElementById('modal-image').value;
+  document.getElementById('modal').classList.remove('open');
+  debounceSave();
+  renderBoard();
+});
+
+document.getElementById('bonus-input').addEventListener('input', e => {
+  gameState.bonusPoints = parseInt(e.target.value) || 0;
+  debounceSave();
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (!confirm('Reset ALL team completions? This cannot be undone.')) return;
+  gameState.tiles.forEach(t => { t.completed = [false, false, false]; });
+  debounceSave();
+  renderBoard();
+});
+
+// Init
+onValue(bingoRef, (snapshot) => {
+  const data = snapshot.val();
+  if (data && data.tiles && data.teams) {
+    gameState = data;
+  } else {
+    gameState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    set(bingoRef, gameState);
+  }
+  document.getElementById('bonus-input').value = gameState.bonusPoints || 75;
+  renderTeams();
+  renderBoard();
+}, { onlyOnce: true });
+</script>
+</body>
+</html>
