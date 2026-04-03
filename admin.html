@@ -526,6 +526,7 @@ function renderTeams() {
     div.innerHTML = `
       <div class="team-label">Team ${ti + 1}</div>
       <input type="text" placeholder="Team name" value="${team.name || ''}" data-field="name" data-team="${ti}">
+      <input type="text" placeholder="Short nickname (for tile badges)" value="${team.nickname || ''}" data-field="nickname" data-team="${ti}">
       <input type="url" placeholder="Logo URL (Imgur)" value="${team.logo || ''}" data-field="logo" data-team="${ti}">
     `;
     container.appendChild(div);
@@ -556,7 +557,7 @@ function renderBoard() {
 
     const toggles = gameState.teams.map((team, ti) => {
       const active = tile.completed && tile.completed[ti] ? 'active' : '';
-      const shortName = (team.name || `T${ti+1}`).substring(0, 6);
+      const shortName = (team.nickname || team.name || `T${ti+1}`).substring(0, 6);
       return `<button class="team-toggle ${active}" data-team="${ti}" data-idx="${idx}">${shortName}</button>`;
     }).join('');
 
